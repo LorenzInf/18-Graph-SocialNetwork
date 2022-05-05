@@ -38,7 +38,11 @@ public class MainController {
      * @return true, falls ein neuer Nutzer hinzugefügt wurde, sonst false.
      */
     public boolean insertUser(String name){
-        //TODO 05: Nutzer dem sozialen Netzwerk hinzufügen.
+        //TODO 05: Nutzer dem sozialen Netzwerk hinzufügen. ✓
+        if(allUsers.getVertex(name) == null) {
+            allUsers.addVertex(new Vertex(name));
+            return true;
+        }
         return false;
     }
 
@@ -58,6 +62,8 @@ public class MainController {
      */
     public String[] getAllUsers(){
         //TODO 06: String-Array mit allen Nutzernamen erstellen.
+        Vertix vertices = allUsers.getVertices();
+        String[] s = new String[];
         return null;
     }
 
