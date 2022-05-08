@@ -171,7 +171,7 @@ public class MainController {
         //TODO 08: Freundschaften schließen. ✓
         List<Vertex> vertices = allUsers.getVertices();
         vertices.toFirst();
-        while(!Objects.equals(vertices.getContent().getID(), name01) || !Objects.equals(vertices.getContent().getID(), name02)) {
+        while(vertices.hasAccess() && (!Objects.equals(vertices.getContent().getID(), name01) || !Objects.equals(vertices.getContent().getID(), name02))) {
             vertices.next();
         }
         if(vertices.hasAccess()) {
