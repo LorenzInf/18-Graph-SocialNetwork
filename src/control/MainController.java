@@ -89,15 +89,15 @@ public class MainController {
             i++;
             vertices.next();
         }
-        String[] s = new String[i];
+        String[] result = new String[i];
         vertices.toFirst();
         i = 0;
         while(vertices.hasAccess()) {
-            s[0] = vertices.getContent().getID();
+            result[i] = vertices.getContent().getID();
             i++;
             vertices.next();
         }
-        return s;
+        return result;
     }
 
     /**
@@ -170,17 +170,17 @@ public class MainController {
     public boolean befriend(String name01, String name02){
         //TODO 08: Freundschaften schließen. ✓
         List<Vertex> vertices = allUsers.getVertices();
+        List<Edge> edges = allUsers.getEdges();
         vertices.toFirst();
-        while(vertices.hasAccess() && (!Objects.equals(vertices.getContent().getID(), name01) || !Objects.equals(vertices.getContent().getID(), name02))) {
-            vertices.next();
+        edges.toFirst();
+        while(edges.hasAccess()
+                && ((!Objects.equals(edges.getContent().getVertices()[0].getID(), name01) && !Objects.equals(edges.getContent().getVertices()[1].getID(), name02))
+                || (!Objects.equals(edges.getContent().getVertices()[1].getID(), name01) && !Objects.equals(edges.getContent().getVertices()[0].getID(), name02)))) {
+            edges.next();
         }
-        if(vertices.hasAccess()) {
-            while(!Objects.equals(vertices.getContent().getID(), name01) || !Objects.equals(vertices.getContent().getID(), name02)) {
-                vertices.next();
-            }
-            if(vertices.hasAccess()) {
-                allUsers.addEdge(new Edge(new Vertex(name01), new Vertex(name02), 0));
-            }
+        if(!edges.hasAccess()) {
+            allUsers.addEdge(new Edge(allUsers.getVertex(name01), allUsers.getVertex(name02), 0));
+            return true;
         }
         return false;
     }
@@ -246,17 +246,50 @@ public class MainController {
         Vertex user01 = allUsers.getVertex(name01);
         Vertex user02 = allUsers.getVertex(name02);
         List<Edge> edges = allUsers.getEdges();
+        List<Vertex> tmp = new List<>();
         if(user01 != null && user02 != null){
             //TODO 13: Schreibe einen Algorithmus, der mindestens eine Verbindung von einem Nutzer über Zwischennutzer zu einem anderem Nutzer bestimmt. Happy Kopfzerbrechen!
             edges.toFirst();
-            while(edges.hasAccess()) {
-                if (edges.getContent().getVertices()[0].getID().equals(name01) && edges.getContent().getVertices()[1].getID().equals(name02)
-                        || edges.getContent().getVertices()[1].getID().equals(name01) && edges.getContent().getVertices()[0].getID().equals(name02)) {
-                    return null;
-                }
+            tmp.append(user01);
+            getLinksBetweenRe(user01,user02,edges,tmp);
+            tmp.toFirst();
+            int i = 0;
+            while(tmp.hasAccess()) {
+                i++;
+                tmp.next();
             }
+            String[] result = new String[i];
+            i = 0;
+            while(tmp.hasAccess()) {
+                result[i] = tmp.getContent().getID();
+                i++;
+                tmp.next();
+            }
+            return result;
         }
         return null;
+    }
+
+    private void getLinksBetweenRe(Vertex user01, Vertex user02, List<Edge> edges, List<Vertex> tmp){
+        edges.toFirst();
+        while(edges.hasAccess()) {
+            if (edges.getContent().getVertices()[0] == user01 && !edges.getContent().isMarked()) {
+                tmp.append(edges.getContent().getVertices()[1]);
+                edges.getContent().setMark(true);
+                getLinksBetweenRe(edges.getContent().getVertices()[1],user02,edges,tmp);
+            } else if (edges.getContent().getVertices()[1] == user01 && !edges.getContent().isMarked()) {
+                tmp.append(edges.getContent().getVertices()[0]);
+                edges.getContent().setMark(true);
+                getLinksBetweenRe(edges.getContent().getVertices()[0],user02,edges,tmp);
+            }
+            if (edges.getContent().getVertices()[0] == user02 && !edges.getContent().isMarked()) {
+                tmp.append(edges.getContent().getVertices()[0]);
+            } else if (edges.getContent().getVertices()[1] == user02 && !edges.getContent().isMarked()) {
+                tmp.append(edges.getContent().getVertices()[1]);
+            }
+            edges.getContent().setMark(true);
+            edges.next();
+        }
     }
 
     /**
