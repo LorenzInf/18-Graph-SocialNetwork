@@ -41,7 +41,7 @@ public class MainController {
      */
     public boolean insertUser(String name){
         //TODO 05: Nutzer dem sozialen Netzwerk hinzufügen. ✓
-        if(allUsers.getVertex(name) == null) {
+        if(name != null && allUsers.getVertex(name) == null) {
             allUsers.addVertex(new Vertex(name));
             return true;
         }
@@ -55,22 +55,8 @@ public class MainController {
      */
     public boolean deleteUser(String name){
         //TODO 07: Nutzer aus dem sozialen Netzwerk entfernen. ✓
-        Vertex toRemove = allUsers.getVertex(name);
-        if(toRemove != null) {
-            List<Edge> edges = allUsers.getEdges();
-            List<Vertex> vertices = allUsers.getVertices();
-            edges.toFirst();
-            while(edges.hasAccess()) {
-                if(edges.getContent().getVertices()[0] == toRemove || edges.getContent().getVertices()[1] == toRemove) {
-                    edges.remove();
-                }
-                edges.next();
-            }
-            vertices.toFirst();
-            while(vertices.getContent() != toRemove) {
-                vertices.next();
-            }
-            vertices.remove();
+        if(name != null && allUsers.getVertex(name) != null) {
+            allUsers.removeVertex(allUsers.getVertex(name));
             return true;
         }
         return false;
@@ -107,7 +93,6 @@ public class MainController {
      */
     public String[] getAllFriendsFromUser(String name){
         //TODO 09: Freundesliste eines Nutzers als String-Array erstellen. ✓
-        List<Vertex> vertices = allUsers.getVertices();
         List<Edge> edges = allUsers.getEdges();
         int i = 0;
         if(allUsers.getVertex(name) != null) {
@@ -134,7 +119,7 @@ public class MainController {
             }
             return s;
         }
-        return null;
+        return new String[0];
     }
 
     /**
@@ -147,16 +132,9 @@ public class MainController {
     public double centralityDegreeOfUser(String name){
         //TODO 10: Prozentsatz der vorhandenen Freundschaften eines Nutzers von allen möglichen Freundschaften des Nutzers. ✓
         if(allUsers.getVertex(name) != null) {
-            String[] friends = getAllFriendsFromUser(name);
-            if(friends == null) return 0.0;
-            int i = 0;
-            List<Edge> edges = allUsers.getEdges();
-            edges.toFirst();
-            while(edges.hasAccess()) {
-                i++;
-                edges.next();
-            }
-            return (double) friends.length / i;
+            int friendsNumber = getAllFriendsFromUser(name).length;
+            int i = getAllUsers().length - 1;
+            return (double) friendsNumber / i;
         }
         return -1.0;
     }
@@ -168,7 +146,7 @@ public class MainController {
      * @return true, falls eine neue Freundeschaft entstanden ist, ansonsten false.
      */
     public boolean befriend(String name01, String name02){
-        //TODO 08: Freundschaften schließen. ✓
+        //TODO 08: Freundschaften schließen. ✓ (Geht beträchtlich kürzer)
         List<Vertex> vertices = allUsers.getVertices();
         List<Edge> edges = allUsers.getEdges();
         vertices.toFirst();
@@ -192,7 +170,7 @@ public class MainController {
      * @return true, falls ihre Freundschaft beendet wurde, ansonsten false.
      */
     public boolean unfriend(String name01, String name02) {
-        //TODO 11: Freundschaften beenden. ✓
+        //TODO 11: Freundschaften beenden. ✓ (Geht beträchtlich kürzer)
         if (allUsers.getVertex(name01) != null && allUsers.getVertex(name02) != null) {
             List<Edge> edges = allUsers.getEdges();
             edges.toFirst();
@@ -216,23 +194,17 @@ public class MainController {
     public double dense(){
         //TODO 12: Dichte berechnen. ✓
         List<Edge> edges = allUsers.getEdges();
-        List<Vertex> vertices = allUsers.getVertices();
         double friendships = 0;
         double possibleFriendships;
-        int userCount = 0;
+        int userCount = getAllUsers().length;
         edges.toFirst();
         while(edges.hasAccess()) {
             friendships++;
             edges.next();
         }
-        vertices.toFirst();
-        while(vertices.hasAccess()) {
-            userCount++;
-            vertices.next();
-        }
         possibleFriendships = (userCount - 1) * userCount;
-
-        return friendships / possibleFriendships;
+                                                            //idek
+        return (friendships / possibleFriendships) * 2;
     }
 
     /**
@@ -245,51 +217,16 @@ public class MainController {
     public String[] getLinksBetween(String name01, String name02){
         Vertex user01 = allUsers.getVertex(name01);
         Vertex user02 = allUsers.getVertex(name02);
-        List<Edge> edges = allUsers.getEdges();
-        List<Vertex> tmp = new List<>();
         if(user01 != null && user02 != null){
             //TODO 13: Schreibe einen Algorithmus, der mindestens eine Verbindung von einem Nutzer über Zwischennutzer zu einem anderem Nutzer bestimmt. Happy Kopfzerbrechen!
-            edges.toFirst();
-            tmp.append(user01);
-            getLinksBetweenRe(user01,user02,edges,tmp);
-            tmp.toFirst();
-            int i = 0;
-            while(tmp.hasAccess()) {
-                i++;
-                tmp.next();
-            }
-            String[] result = new String[i];
-            i = 0;
-            while(tmp.hasAccess()) {
-                result[i] = tmp.getContent().getID();
-                i++;
-                tmp.next();
-            }
-            return result;
+
+            return null;
         }
         return null;
     }
 
-    private void getLinksBetweenRe(Vertex user01, Vertex user02, List<Edge> edges, List<Vertex> tmp){
-        edges.toFirst();
-        while(edges.hasAccess()) {
-            if (edges.getContent().getVertices()[0] == user01 && !edges.getContent().isMarked()) {
-                tmp.append(edges.getContent().getVertices()[1]);
-                edges.getContent().setMark(true);
-                getLinksBetweenRe(edges.getContent().getVertices()[1],user02,edges,tmp);
-            } else if (edges.getContent().getVertices()[1] == user01 && !edges.getContent().isMarked()) {
-                tmp.append(edges.getContent().getVertices()[0]);
-                edges.getContent().setMark(true);
-                getLinksBetweenRe(edges.getContent().getVertices()[0],user02,edges,tmp);
-            }
-            if (edges.getContent().getVertices()[0] == user02 && !edges.getContent().isMarked()) {
-                tmp.append(edges.getContent().getVertices()[0]);
-            } else if (edges.getContent().getVertices()[1] == user02 && !edges.getContent().isMarked()) {
-                tmp.append(edges.getContent().getVertices()[1]);
-            }
-            edges.getContent().setMark(true);
-            edges.next();
-        }
+    private void getLinksBetweenRe(){
+
     }
 
     /**

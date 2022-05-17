@@ -100,7 +100,7 @@ public class Graph{
    */
   public void addVertex(Vertex pVertex){
     //TODO 04: Neues Knoten-Objekt hinzufügen. ✓
-    if(pVertex != null && getVertex(pVertex.getID()) == null) vertices.append(pVertex);
+    if(pVertex != null && pVertex.getID() != null && getVertex(pVertex.getID()) == null) vertices.append(pVertex);
   }
 
   /**
