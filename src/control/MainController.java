@@ -20,6 +20,8 @@ public class MainController {
     public MainController(){
         allUsers = new Graph();
         createSomeUsers();
+        if(testIfConnected()) System.out.println("The graph is connected");
+        else System.out.println("The graph is not connected");
     }
 
     /**
@@ -32,6 +34,7 @@ public class MainController {
         insertUser("Ralle");
         befriend("Silent Bob", "Ralle");
         befriend("Dörte", "Ralle");
+        //befriend("Ulf","Dörte");
     }
 
     /**
@@ -234,7 +237,26 @@ public class MainController {
      * @return true, falls ohne einsame Knoten, sonst false.
      */
     public boolean someoneIsLonely(){
-        //TODO 14: Schreibe einen Algorithmus, der explizit den von uns benutzten Aufbau der Datenstruktur Graph und ihre angebotenen Methoden so ausnutzt, dass schnell (!) iterativ geprüft werden kann, ob der Graph allUsers keine einsamen Knoten hat. Dies lässt sich mit einer einzigen Schleife prüfen.
+        //TODO 14: Schreibe einen Algorithmus, der explizit den von uns benutzten Aufbau der Datenstruktur Graph und ihre angebotenen Methoden so ausnutzt, dass schnell (!) iterativ geprüft werden kann, ob der Graph allUsers keine einsamen Knoten hat. Dies lässt sich mit einer einzigen Schleife prüfen. ✓
+        var vertices = allUsers.getVertices();
+        vertices.toFirst();
+        boolean hasEdge = false;
+        while(vertices.hasAccess()) {
+            var tmp = vertices.getContent();
+            vertices.toFirst();
+            while(vertices.hasAccess()) {
+                if(allUsers.getEdge(tmp,vertices.getContent()) != null)
+                    hasEdge = true;
+                vertices.next();
+            }
+            if(!hasEdge) return true;
+            hasEdge = false;
+            vertices.toFirst();
+            while(vertices.getContent() != tmp) {
+                vertices.next();
+            }
+            vertices.next();
+        }
         return false;
     }
 
@@ -245,7 +267,50 @@ public class MainController {
      */
     public boolean testIfConnected(){
         //TODO 15: Schreibe einen Algorithmus, der ausgehend vom ersten Knoten in der Liste aller Knoten versucht, alle anderen Knoten über Kanten zu erreichen und zu markieren.
-        return false;
+        var vertices = allUsers.getVertices();
+        vertices.toFirst();
+        var firstNode = vertices.getContent();
+        firstNode.setMark(true);
+        vertices.next();
+        while(vertices.hasAccess()) {
+            if(allUsers.getEdge(firstNode,vertices.getContent()) != null) {
+                vertices.getContent().setMark(true);
+                var tmp = vertices.getContent();
+                testIfConnected(vertices.getContent());
+                vertices.toFirst();
+                while(tmp != vertices.getContent()) {
+                    vertices.next();
+                }
+                vertices.next();
+            }
+            vertices.next();
+        }
+        vertices.toFirst();
+        while(vertices.hasAccess() && vertices.getContent().isMarked()) {
+            vertices.next();
+        }
+        allUsers.setAllVertexMarks(false);
+        return !vertices.hasAccess();
+    }
+
+    public void testIfConnected(Vertex vertex) {
+        var vertices = allUsers.getVertices();
+        vertices.toFirst();
+        while(vertices.hasAccess()) {
+            if(allUsers.getEdge(vertex,vertices.getContent()) != null) {
+                if(!vertices.getContent().isMarked()) {
+                    vertices.getContent().setMark(true);
+                    var tmp = vertices.getContent();
+                    testIfConnected(vertices.getContent());
+                    vertices.toFirst();
+                    while(tmp != vertices.getContent()) {
+                        vertices.next();
+                    }
+                    vertices.next();
+                }
+            }
+            vertices.next();
+        }
     }
     
     /**

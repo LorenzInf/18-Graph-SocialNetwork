@@ -41,5 +41,4 @@ public class MainProgram {
         MainFrame mainFrame = new MainFrame(mainController, programTitle, x, y, windowWidth, windowHeight);
         mainFrame.setResizable(true);
     }
-
 }
